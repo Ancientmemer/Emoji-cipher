@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Emoji Cipher - Low/High Security</title>
+<style>
+  body{font-family:system-ui,Arial;background:#f7f7fd;color:#111;padding:18px;text-align:center;}
+  .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,50,.06);}
+  textarea{width:92%;min-height:90px;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#fff;cursor:pointer;font-weight:600}
+  .muted{background:#eef2ff;color:#111;border:0}
+  .danger{background:#ef4444}
+  .controls {display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+  #output{min-height:80px}
+  .small{font-size:13px;color:#555;margin-top:8px}
+  .chart{margin:14px auto;max-width:760px;text-align:left;border-collapse:collapse;}
+  .chart td{padding:8px;border:1px solid #eee;font-size:18px}
+  .pill{padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;margin:4px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🔐 Emoji Cipher (Low/High Security)</h1>
+<p class="small">Choose Security Mode → Low = Unicode, High = Custom Emoji Cipher</p>
+
+<div class="row controls">
+  <label><input type="radio" name="sec" value="low" checked> Low Security</label>
+  <label><input type="radio" name="sec" value="high"> High Security</label>
+</div>
+
+<textarea id="input" placeholder="Type text here..."></textarea>
+
+<div class="row controls">
+  <button onclick="encode()">Encode</button>
+  <button onclick="decode()">Decode</button>
+  <button class="muted" onclick="copyOutput()">Copy</button>
+  <button class="muted" onclick="resetAll()">Reset</button>
+  <button class="muted" onclick="toggleChart()">Show/Hide Chart</button>
+</div>
+
+<textarea id="output" readonly placeholder="Result will appear here..."></textarea>
+
+<div id="chartArea" style="display:none;margin-top:14px">
+  <h3 style="margin-bottom:6px">📖 Cipher Chart (High Security)</h3>
+  <table class="chart"></table>
+  <p class="small">Codes shown as <code>#01</code> etc. Space = <code>#00</code></p>
+</div>
+</div>
+
+<script>
+/***************
+ * MAPPING
+ ***************/
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const emojiList = ["😀","🐒","🌙","🍩","🥚","🍟","🦍","🏠","🍦","🕹️","🔑","🍋","🌝","🎶","🍊","🥞","❓","🌈","⭐","🌴","☂️","🌋","🌊","❌","🍸","⚡"];
+const MAP = {};
+const EMOJI_TO_LETTER = {};
+const CODE_TO_LETTER = {};
+
+for(let i=0;i<letters.length;i++){
+  const L = letters[i];
+  const emoji = emojiList[i] || "🔹";
+  const code = "#"+String(i+1).padStart(2,"0");
+  MAP[L] = {emoji, code};
+  EMOJI_TO_LETTER[emoji] = L;
+  CODE_TO_LETTER[code] = L;
+}
+MAP[" "] = {emoji:"⬜", code:"#00"};
+EMOJI_TO_LETTER["⬜"]=" ";
+CODE_TO_LETTER["#00"]=" ";
+
+// Extra words (optional)
+const EXTRA = {"NJAN":"🙋‍♂️","NEE":"👉","SNEHAM":"❤️","ONAM":"🌼","KAZHINJU":"✅"};
+for(const [w,e] of Object.entries(EXTRA)){ EMOJI_TO_LETTER[e]=w; }
+
+// Build chart
+function buildChart(){
+  const tbl=document.querySelector(".chart"); tbl.innerHTML="";
+  let row;
+  for(let i=0;i<letters.length;i+=3){
+    row=document.createElement("tr");
+    for(let j=0;j<3;j++){
+      const idx=i+j;
+      if(idx<letters.length){
+        const L=letters[idx], e=MAP[L].emoji, c=MAP[L].code;
+        ["td","td","td"].forEach((_,k)=>{
+          const td=document.createElement("td");
+          td.innerText=k===0?L:k===1?e:c;
+          row.appendChild(td);
+        });
+      }else{row.appendChild(document.createElement("td")); row.appendChild(document.createElement("td")); row.appendChild(document.createElement("td"))}
+    }
+    tbl.appendChild(row);
+  }
+  const row2=document.createElement("tr"); row2.innerHTML="<td>Space</td><td>⬜</td><td>#00</td>"; tbl.appendChild(row2);
+  const exRow=document.createElement("tr");
+  exRow.innerHTML="<td colspan='3'><strong>Extras:</strong> "+Object.entries(EXTRA).map(([w,e])=>`<span class='pill'>${w}→${e}</span>`).join(" ")+"</td>";
+  tbl.appendChild(exRow);
+}
+buildChart();
+
+// UI helpers
+function toggleChart(){ const el=document.getElementById("chartArea"); el.style.display=(el.style.display==="none"?"block":"none"); }
+function copyOutput(){ const out=document.getElementById("output"); out.select(); out.setSelectionRange(0,999999); navigator.clipboard.writeText(out.value).then(()=>alert("Copied ✅"));}
+function resetAll(){ document.getElementById("input").value=""; document.getElementById("output").value=""; }
+function getMode(){ return document.querySelector('input[name="sec"]:checked').value; }
+
+// ENCODE
+function encode(){
+  const raw=document.getElementById("input").value||"";
+  const mode=getMode();
+  if(mode==="low"){ // Unicode hex
+    const out=[...raw].map(ch=>ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,"0")).map(u=>"U+"+u).join(" ");
+    document.getElementById("output").value=out;
+  }else{ // High Security Emoji
+    const tokens=raw.split("");
+    const out=tokens.map(ch=>{
+      const up=ch.toUpperCase();
+      if(MAP[up]) return MAP[up].emoji;
+      if(EXTRA[up]) return EXTRA[up];
+      return ch;
+    }).join("");
+    document.getElementById("output").value=out;
+  }
+}
+
+// DECODE
+function decode(){
+  const raw=document.getElementById("input").value||"";
+  const mode=getMode();
+  if(mode==="low"){ // Unicode hex → letters
+    const parts=raw.split(/\s+/).filter(Boolean);
+    const out=parts.map(p=>{
+      if(/^U\+[0-9A-F]{4,6}$/i.test(p)){
+        return String.fromCharCode(parseInt(p.replace("U+",""),16));
+      }
+      return p;
+    }).join("");
+    document.getElementById("output").value=out;
+  }else{ // High Security Emoji → letters
+    const emojis=Object.keys(EMOJI_TO_LETTER).sort((a,b)=>b.length-a.length);
+    let i=0, out="";
+    while(i<raw.length){
+      let matched=false;
+      for(const e of emojis){
+        if(raw.startsWith(e,i)){ out+=EMOJI_TO_LETTER[e]; i+=e.length; matched=true; break; }
+      }
+      if(!matched){ out+=raw[i]; i++; }
+    }
+    document.getElementById("output").value=out;
+  }
+}
+</script>
+</body>
+</html>
