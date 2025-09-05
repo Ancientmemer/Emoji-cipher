@@ -5,25 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Emoji Cipher - Low/High Security</title>
 <style>
-  body{font-family:system-ui,Arial;background:#f7f7fd;color:#111;padding:18px;text-align:center;}
-  .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,50,.06);}
-  textarea{width:92%;min-height:90px;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;resize:vertical}
-  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-  button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#fff;cursor:pointer;font-weight:600}
-  .muted{background:#eef2ff;color:#111;border:0}
-  .danger{background:#ef4444}
-  .controls {display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-  #output{min-height:80px}
-  .small{font-size:13px;color:#555;margin-top:8px}
-  .chart{margin:14px auto;max-width:760px;text-align:left;border-collapse:collapse;}
-  .chart td{padding:8px;border:1px solid #eee;font-size:18px}
-  .pill{padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;margin:4px;display:inline-block}
+body{font-family:system-ui,Arial;background:#f7f7fd;color:#111;padding:18px;text-align:center;}
+.card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,50,.06);}
+textarea{width:92%;min-height:90px;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#fff;cursor:pointer;font-weight:600}
+.muted{background:#eef2ff;color:#111;border:0}
+.controls {display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+#output{min-height:80px}
+.small{font-size:13px;color:#555;margin-top:8px}
+.chart{margin:14px auto;max-width:760px;text-align:left;border-collapse:collapse;}
+.chart td{padding:8px;border:1px solid #eee;font-size:18px}
+.pill{padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;margin:4px;display:inline-block}
 </style>
 </head>
 <body>
 <div class="card">
 <h1>🔐 Emoji Cipher (Low/High Security)</h1>
-<p class="small">Choose Security Mode → Low = Unicode, High = Custom Emoji Cipher</p>
+<p class="small">Choose Security Mode → Low = Universal Unicode, High = Custom Emoji Cipher</p>
 
 <div class="row controls">
   <label><input type="radio" name="sec" value="low" checked> Low Security</label>
@@ -51,7 +50,7 @@
 
 <script>
 /***************
- * MAPPING
+ * MAPPING (High Security)
  ***************/
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const emojiList = ["😀","🐒","🌙","🍩","🥚","🍟","🦍","🏠","🍦","🕹️","🔑","🍋","🌝","🎶","🍊","🥞","❓","🌈","⭐","🌴","☂️","🌋","🌊","❌","🍸","⚡"];
@@ -71,11 +70,9 @@ MAP[" "] = {emoji:"⬜", code:"#00"};
 EMOJI_TO_LETTER["⬜"]=" ";
 CODE_TO_LETTER["#00"]=" ";
 
-// Extra words (optional)
 const EXTRA = {"NJAN":"🙋‍♂️","NEE":"👉","SNEHAM":"❤️","ONAM":"🌼","KAZHINJU":"✅"};
 for(const [w,e] of Object.entries(EXTRA)){ EMOJI_TO_LETTER[e]=w; }
 
-// Build chart
 function buildChart(){
   const tbl=document.querySelector(".chart"); tbl.innerHTML="";
   let row;
@@ -111,8 +108,8 @@ function getMode(){ return document.querySelector('input[name="sec"]:checked').v
 function encode(){
   const raw=document.getElementById("input").value||"";
   const mode=getMode();
-  if(mode==="low"){ // Unicode hex
-    const out=[...raw].map(ch=>ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,"0")).map(u=>"U+"+u).join(" ");
+  if(mode==="low"){ // Universal Unicode
+    const out=[...raw].map(c => "U+"+c.codePointAt(0).toString(16).toUpperCase().padStart(4,"0")).join(" ");
     document.getElementById("output").value=out;
   }else{ // High Security Emoji
     const tokens=raw.split("");
@@ -130,16 +127,16 @@ function encode(){
 function decode(){
   const raw=document.getElementById("input").value||"";
   const mode=getMode();
-  if(mode==="low"){ // Unicode hex → letters
+  if(mode==="low"){ // Unicode → letters
     const parts=raw.split(/\s+/).filter(Boolean);
     const out=parts.map(p=>{
       if(/^U\+[0-9A-F]{4,6}$/i.test(p)){
-        return String.fromCharCode(parseInt(p.replace("U+",""),16));
+        return String.fromCodePoint(parseInt(p.replace("U+",""),16));
       }
       return p;
     }).join("");
     document.getElementById("output").value=out;
-  }else{ // High Security Emoji → letters
+  }else{ // Emoji → letters
     const emojis=Object.keys(EMOJI_TO_LETTER).sort((a,b)=>b.length-a.length);
     let i=0, out="";
     while(i<raw.length){
