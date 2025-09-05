@@ -109,7 +109,7 @@ function encode(){
   const raw=document.getElementById("input").value||"";
   const mode=getMode();
   if(mode==="low"){ // Universal Unicode
-    const out=[...raw].map(c => "U+"+c.codePointAt(0).toString(16).toUpperCase().padStart(4,"0")).join(" ");
+    const out=[...raw].map(c => "\u"+c.codePointAt(0).toString(16).toUpperCase().padStart(4,"0")).join(" ");
     document.getElementById("output").value=out;
   }else{ // High Security Emoji
     const tokens=raw.split("");
@@ -130,8 +130,8 @@ function decode(){
   if(mode==="low"){ // Unicode → letters
     const parts=raw.split(/\s+/).filter(Boolean);
     const out=parts.map(p=>{
-      if(/^U\+[0-9A-F]{4,6}$/i.test(p)){
-        return String.fromCodePoint(parseInt(p.replace("U+",""),16));
+      if(/^\\u[0-9A-F]{4,6}$/i.test(p)){
+        return String.fromCodePoint(parseInt(p.replace("/u",""),16));
       }
       return p;
     }).join("");
