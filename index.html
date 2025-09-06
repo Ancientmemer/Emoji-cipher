@@ -1,23 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Glyphmoji - Low/High Security</title>
-<style>
-body{font-family:system-ui,Arial;background:#f7f7fd;color:#111;padding:18px;text-align:center;}
-.card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,50,.06);}
-textarea{width:92%;min-height:90px;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;resize:vertical}
-.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#fff;cursor:pointer;font-weight:600}
-.muted{background:#eef2ff;color:#111;border:0}
-.controls {display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-#output{min-height:80px}
-.small{font-size:13px;color:#555;margin-top:8px}
-.chart{margin:14px auto;max-width:760px;text-align:left;border-collapse:collapse;}
-.chart td{padding:8px;border:1px solid #eee;font-size:18px}
-.pill{padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;margin:4px;display:inline-block}
-.nice-list {
+  <meta charset="UTF-8">
+  <meta name="description" content="Glyphmoji - Convert text into secret emoji codes or Unicode. Share your secret messages with friends. Free online tool.">
+  <meta name="keywords" content="emoji cipher, unicode decoder, secret code, text to emoji, glyphmoji, encode decode online">
+  <title>Glyphmoji - Emoji Cipher</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#111; color:#fff; text-align:center; padding:20px; }
+    textarea { width:90%; height:120px; margin:10px 0; border-radius:10px; padding:10px; font-size:16px; }
+    select, button { margin:5px; padding:10px 15px; border:none; border-radius:8px; font-size:16px; cursor:pointer; }
+    button { background:#ff9800; color:#fff; }
+    button:hover { background:#e68900; }
+    .output { margin-top:20px; padding:15px; border-radius:10px; background:#222; }
+  .nice-list {
   margin: 0;
   padding: 0 0 0 1.25rem; /* left padding for default bullets */
   list-style: disc;
@@ -30,185 +25,115 @@ button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#f
   margin: .35rem 0;
   font-size: 16px;
 }
-</style>
+  </style>
 </head>
 <body>
-<div class="card">
-<h1>🔐 Glyphmoji (Low/High Security)</h1>
-<p class="small">Choose Security Mode → Low = Unicode (UTF-8), High = Custom Emoji Cipher</p>
+  <h1>🌐 Glyphmoji</h1>
+  <p>Convert text ↔ Unicode / Emoji Cipher</p>
 
-<div class="row controls">
-  <label><input type="radio" name="sec" value="low" checked> Low Security</label>
-  <label><input type="radio" name="sec" value="high"> High Security</label>
-</div>
+  <select id="mode">
+    <option value="unicode">🔓 Low Security (Unicode)</option>
+    <option value="emoji">🔐 High Security (Emoji Cipher)</option>
+  </select>
 
-<textarea id="input" placeholder="Type text here..."></textarea>
+  <br>
+  <textarea id="input" placeholder="Type text here..."></textarea><br>
+  <button onclick="encodeText()">Encode</button>
+  <button onclick="decodeText()">Decode</button>
+  <button onclick="resetText()">Reset</button>
+  <button onclick="copyText()">Copy</button>
 
-<div class="row controls">
-  <button onclick="encode()">Encode</button>
-  <button onclick="decode()">Decode</button>
-  <button class="muted" onclick="copyOutput()">Copy</button>
-  <button class="muted" onclick="resetAll()">Reset</button>
-  <button class="muted" onclick="toggleChart()">Show/Hide Chart</button>
-</div>
+  <div class="output">
+    <h3>Output:</h3>
+    <p id="output"></p>
+  </div>
 
-<textarea id="output" readonly placeholder="Result will appear here..."></textarea>
+  <script>
+    // English Emoji Map
+    const emojiMap = {
+      "a":"🍎","b":"🍌","c":"🌜","d":"🐬","e":"🥚","f":"🌸","g":"🍇",
+      "h":"🏠","i":"🍦","j":"🕹️","k":"🔑","l":"🍋","m":"🌝","n":"🎶",
+      "o":"🍊","p":"🥞","q":"❓","r":"🤖","s":"🐍","t":"🌴","u":"☂️",
+      "v":"🎻","w":"🌊","x":"❌","y":"🍋","z":"⚡"
+    };
 
-<div id="chartArea" style="display:none;margin-top:14px">
-  <h3 style="margin-bottom:6px">📖 Cipher Chart (High Security)</h3>
-  <table class="chart"></table>
-  <p class="small">Codes shown as <code>#01</code> etc. Space = <code>#00</code></p>
-</div>
-</div>
+    // Malayalam Emoji Map
+    const malayalamEmojiMap = {
+      "അ":"🍎","ആ":"🐝","ഇ":"🐘","ഈ":"🌙","ഉ":"☂️","ഊ":"🦉",
+      "ഋ":"🌊","എ":"🐍","ഏ":"🌼","ഐ":"👁️","ഒ":"🐒","ഓ":"🐢","ഔ":"🦋",
+      "ക":"🦀","ഖ":"🌋","ഗ":"🐊","ഘ":"🔥","ങ":"🐌",
+      "ച":"🍫","ഛ":"🏹","ജ":"🦖","ഝ":"🐉","ഞ":"🧀",
+      "ട":"🎯","ഠ":"🛡️","ഡ":"🥁","ഢ":"🍩","ണ":"🌰",
+      "ത":"🕊️","ഥ":"🌪️","ദ":"🦌","ധ":"🌻","ന":"🪶",
+      "പ":"🍞","ഫ":"🐠","ബ":"🍌","ഭ":"🐝","മ":"🌴",
+      "യ":"🪀","ര":"🌹","ല":"🍃","വ":"🌊",
+      "ശ":"🐚","ഷ":"🦓","സ":"🐍","ഹ":"🌞",
+      "ള":"🪷","ഴ":"🌈","റ":"🦊"
+    };
 
-<script>
-/***************
- * MAPPING (High Security)
- ***************/
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const emojiList = ["😀","🐒","🌙","🍩","🥚","🍟","🦍","🏠","🍦","🕹️","🔑","🍋","🌝","🎶","🍊","🥞","❓","🌈","⭐","🌴","☂️","🌋","🌊","❌","🍸","⚡"];
-const MAP = {};
-const EMOJI_TO_LETTER = {};
-const CODE_TO_LETTER = {};
+    // Encode Function
+    function encodeText() {
+      const input = document.getElementById("input").value;
+      const mode = document.getElementById("mode").value;
+      let result = "";
 
-for(let i=0;i<letters.length;i++){
-  const L = letters[i];
-  const emoji = emojiList[i] || "🔹";
-  const code = "#"+String(i+1).padStart(2,"0");
-  MAP[L] = {emoji, code};
-  EMOJI_TO_LETTER[emoji] = L;
-  CODE_TO_LETTER[code] = L;
-}
-MAP[" "] = {emoji:"⬜", code:"#00"};
-EMOJI_TO_LETTER["⬜"]=" ";
-CODE_TO_LETTER["#00"]=" ";
-
-const EXTRA = {"NJAN":"🙋‍♂️","NEE":"👉","SNEHAM":"❤️","ONAM":"🌼","KAZHINJU":"✅"};
-for(const [w,e] of Object.entries(EXTRA)){ EMOJI_TO_LETTER[e]=w; }
-
-function buildChart(){
-  const tbl=document.querySelector(".chart"); tbl.innerHTML="";
-  let row;
-  for(let i=0;i<letters.length;i+=3){
-    row=document.createElement("tr");
-    for(let j=0;j<3;j++){
-      const idx=i+j;
-      if(idx<letters.length){
-        const L=letters[idx], e=MAP[L].emoji, c=MAP[L].code;
-        ["td","td","td"].forEach((_,k)=>{
-          const td=document.createElement("td");
-          td.innerText=k===0?L:k===1?e:c;
-          row.appendChild(td);
-        });
-      }else{row.appendChild(document.createElement("td")); row.appendChild(document.createElement("td")); row.appendChild(document.createElement("td"))}
-    }
-    tbl.appendChild(row);
-  }
-  const row2=document.createElement("tr"); row2.innerHTML="<td>Space</td><td>⬜</td><td>#00</td>"; tbl.appendChild(row2);
-  const exRow=document.createElement("tr");
-  exRow.innerHTML="<td colspan='3'><strong>Extras:</strong> "+Object.entries(EXTRA).map(([w,e])=>`<span class='pill'>${w}→${e}</span>`).join(" ")+"</td>";
-  tbl.appendChild(exRow);
-}
-buildChart();
-
-// UI helpers
-function toggleChart(){ const el=document.getElementById("chartArea"); el.style.display=(el.style.display==="none"?"block":"none"); }
-function copyOutput(){ const out=document.getElementById("output"); out.select(); out.setSelectionRange(0,999999); navigator.clipboard.writeText(out.value).then(()=>alert("Copied ✅"));}
-function resetAll(){ document.getElementById("input").value=""; document.getElementById("output").value=""; }
-function getMode(){ return document.querySelector('input[name="sec"]:checked').value; }
-
-// ENCODE
-function encode(){
-  const raw=document.getElementById("input").value||"";
-  const mode=getMode();
-  if(mode==="low"){ // Universal Unicode
-    const out=[...raw].map(c => "\\u"+c.codePointAt(0).toString(16).toUpperCase().padStart(4,"0")).join(" ");
-    document.getElementById("output").value=out;
-  }else{ // High Security Emoji
-    const tokens=raw.split("");
-    const out=tokens.map(ch=>{
-      const up=ch.toUpperCase();
-      if(MAP[up]) return MAP[up].emoji;
-      if(EXTRA[up]) return EXTRA[up];
-      return ch;
-    }).join("");
-    document.getElementById("output").value=out;
-  }
-}
-
-// DECODE
-function decode(){
-  const raw=document.getElementById("input").value||"";
-  const mode=getMode();
-  if(mode==="low"){ // Unicode → letters
-    const parts=raw.split(/\s+/).filter(Boolean);
-    const out=parts.map(p=>{
-      if(/\\u[0-9A-F]{4,6}$/i.test(p)){
-        return String.fromCodePoint(parseInt(p.replace("\\u",""),16));
+      if (mode === "unicode") {
+        // Convert to \uXXXX Unicode
+        result = input.split("").map(ch => 
+          "\\u" + ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,"0")
+        ).join(" ");
+      } 
+      else {
+        // Emoji Cipher
+        result = input.split("").map(ch => {
+          if (emojiMap[ch.toLowerCase()]) return emojiMap[ch.toLowerCase()];
+          else if (malayalamEmojiMap[ch]) return malayalamEmojiMap[ch];
+          else return ch;
+        }).join("");
       }
-      return p;
-    }).join("");
-    document.getElementById("output").value=out;
-  }else{ // Emoji → letters
-    const emojis=Object.keys(EMOJI_TO_LETTER).sort((a,b)=>b.length-a.length);
-    let i=0, out="";
-    while(i<raw.length){
-      let matched=false;
-      for(const e of emojis){
-        if(raw.startsWith(e,i)){ out+=EMOJI_TO_LETTER[e]; i+=e.length; matched=true; break; }
+      document.getElementById("output").innerText = result;
+    }
+
+    // Decode Function
+    function decodeText() {
+      const input = document.getElementById("input").value;
+      const mode = document.getElementById("mode").value;
+      let result = "";
+
+      if (mode === "unicode") {
+        // Decode from \uXXXX
+        result = input.split(" ").map(code => {
+          if (code.startsWith("\\u")) {
+            return String.fromCharCode(parseInt(code.slice(2),16));
+          } else return code;
+        }).join("");
+      } 
+      else {
+        // Emoji Cipher reverse
+        const reverseEmojiMap = Object.fromEntries(Object.entries(emojiMap).map(([k,v])=>[v,k]));
+        const reverseMalayalamMap = Object.fromEntries(Object.entries(malayalamEmojiMap).map(([k,v])=>[v,k]));
+        
+        result = input.split("").map(ch => {
+          if (reverseEmojiMap[ch]) return reverseEmojiMap[ch];
+          else if (reverseMalayalamMap[ch]) return reverseMalayalamMap[ch];
+          else return ch;
+        }).join("");
       }
-      if(!matched){ out+=raw[i]; i++; }
+      document.getElementById("output").innerText = result;
     }
-    document.getElementById("output").value=out;
-  }
-}
-// Malayalam Emoji Map
-const malayalamEmojiMap = {
-  "അ": "🍎", "ആ": "🐝", "ഇ": "🐘", "ഈ": "🌙", "ഉ": "☂️", "ഊ": "🦉",
-  "ഋ": "🌊", "എ": "🐍", "ഏ": "🌼", "ഐ": "👁️", "ഒ": "🐒", "ഓ": "🐢", "ഔ": "🦋",
-  "ക": "🦀", "ഖ": "🌋", "ഗ": "🐊", "ഘ": "🔥", "ങ": "🐌",
-  "ച": "🍫", "ഛ": "🏹", "ജ": "🦖", "ഝ": "🐉", "ഞ": "🧀",
-  "ട": "🎯", "ഠ": "🛡️", "ഡ": "🥁", "ഢ": "🍩", "ണ": "🌰",
-  "ത": "🕊️", "ഥ": "🌪️", "ദ": "🦌", "ധ": "🌻", "ന": "🪶",
-  "പ": "🍞", "ഫ": "🐠", "ബ": "🍌", "ഭ": "🐝", "മ": "🌴",
-  "യ": "🪀", "ര": "🌹", "ല": "🍃", "വ": "🌊",
-  "ശ": "🐚", "ഷ": "🦓", "സ": "🐍", "ഹ": "🌞",
-  "ള": "🪷", "ഴ": "🌈", "റ": "🦊"
-};
 
-// Encode Function
-function encodeText(text) {
-  return text.split("").map(char => {
-    if (emojiMap[char.toLowerCase()]) {
-      return emojiMap[char.toLowerCase()];
-    } else if (malayalamEmojiMap[char]) {
-      return malayalamEmojiMap[char];
-    } else {
-      return char;
+    // Reset Function
+    function resetText() {
+      document.getElementById("input").value = "";
+      document.getElementById("output").innerText = "";
     }
-  }).join("");
-}
 
-// Decode Function
-function decodeText(text) {
-  const reverseEmojiMap = Object.fromEntries(
-    Object.entries(emojiMap).map(([k, v]) => [v, k])
-  );
-  const reverseMalayalamMap = Object.fromEntries(
-    Object.entries(malayalamEmojiMap).map(([k, v]) => [v, k])
-  );
-
-  return text.split("").map(char => {
-    if (reverseEmojiMap[char]) {
-      return reverseEmojiMap[char];
-    } else if (reverseMalayalamMap[char]) {
-      return reverseMalayalamMap[char];
-    } else {
-      return char;
+    // Copy Function
+    function copyText() {
+      navigator.clipboard.writeText(document.getElementById("output").innerText);
+      alert("Copied to clipboard!");
     }
-  }).join("");
-  }
-</script>
+  </script>
 <ul class="nice-list">
 <li>You can easily encode and decode.</li>
 <li>If you encode a custom emoji cipher on this site, it can only be decoded here.</li>
