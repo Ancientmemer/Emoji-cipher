@@ -162,6 +162,52 @@ function decode(){
     document.getElementById("output").value=out;
   }
 }
+// Malayalam Emoji Map
+const malayalamEmojiMap = {
+  "അ": "🍎", "ആ": "🐝", "ഇ": "🐘", "ഈ": "🌙", "ഉ": "☂️", "ഊ": "🦉",
+  "ഋ": "🌊", "എ": "🐍", "ഏ": "🌼", "ഐ": "👁️", "ഒ": "🐒", "ഓ": "🐢", "ഔ": "🦋",
+  "ക": "🦀", "ഖ": "🌋", "ഗ": "🐊", "ഘ": "🔥", "ങ": "🐌",
+  "ച": "🍫", "ഛ": "🏹", "ജ": "🦖", "ഝ": "🐉", "ഞ": "🧀",
+  "ട": "🎯", "ഠ": "🛡️", "ഡ": "🥁", "ഢ": "🍩", "ണ": "🌰",
+  "ത": "🕊️", "ഥ": "🌪️", "ദ": "🦌", "ധ": "🌻", "ന": "🪶",
+  "പ": "🍞", "ഫ": "🐠", "ബ": "🍌", "ഭ": "🐝", "മ": "🌴",
+  "യ": "🪀", "ര": "🌹", "ല": "🍃", "വ": "🌊",
+  "ശ": "🐚", "ഷ": "🦓", "സ": "🐍", "ഹ": "🌞",
+  "ള": "🪷", "ഴ": "🌈", "റ": "🦊"
+};
+
+// Encode Function
+function encodeText(text) {
+  return text.split("").map(char => {
+    if (emojiMap[char.toLowerCase()]) {
+      return emojiMap[char.toLowerCase()];
+    } else if (malayalamEmojiMap[char]) {
+      return malayalamEmojiMap[char];
+    } else {
+      return char;
+    }
+  }).join("");
+}
+
+// Decode Function
+function decodeText(text) {
+  const reverseEmojiMap = Object.fromEntries(
+    Object.entries(emojiMap).map(([k, v]) => [v, k])
+  );
+  const reverseMalayalamMap = Object.fromEntries(
+    Object.entries(malayalamEmojiMap).map(([k, v]) => [v, k])
+  );
+
+  return text.split("").map(char => {
+    if (reverseEmojiMap[char]) {
+      return reverseEmojiMap[char];
+    } else if (reverseMalayalamMap[char]) {
+      return reverseMalayalamMap[char];
+    } else {
+      return char;
+    }
+  }).join("");
+  }
 </script>
 <ul class="nice-list">
 <li>You can easily encode and decode.</li>
