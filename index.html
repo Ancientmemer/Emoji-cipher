@@ -145,7 +145,7 @@ function decode(){
   if(mode==="low"){ // Unicode → letters
     const parts=raw.split(/\s+/).filter(Boolean);
     const out=parts.map(p=>{
-      if(/\\/u[0-9A-F]{4,6}$/i.test(p)){
+      if(/\\u[0-9A-F]{4,6}$/i.test(p)){
         return String.fromCodePoint(parseInt(p.replace("\\u",""),16));
       }
       return p;
