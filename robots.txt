@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://glyphmoji.vercel.app/sitemap.xml
