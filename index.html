@@ -7,7 +7,7 @@
 <meta name="keywords" content="emoji cipher, unicode converter, Malayalam emoji, secret code, glyphmoji">
 <meta name="robots" content="index, follow">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Glyphmoji - Low/High Security</title>
+<title>Glyphmoji - Unicode/Emoji cipher</title>
 <style>
 body{font-family:system-ui,Arial;background:#f7f7fd;color:#111;padding:18px;text-align:center;}
 .card{max-width:900px;margin:12px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,50,.06);}
@@ -21,31 +21,18 @@ button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#f
 .chart{margin:14px auto;max-width:760px;text-align:left;border-collapse:collapse;}
 .chart td{padding:8px;border:1px solid #eee;font-size:18px}
 .pill{padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;margin:4px;display:inline-block;
-/* CSS */
-.nice-list {
-  margin: 0;
-  padding: 0 0 0 1.25rem; /* left padding for default bullets */
-  list-style: disc;
-  line-height: 1.8;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  color: #222;
-  text-align: left;
-}
-.nice-list li {
-  margin: .35rem 0;
-  font-size: 16px;
 }
 }
 </style>
 </head>
 <body>
 <div class="card">
-<h1>🌐 Glyphmoji (Low/High Security)</h1>
-<p class="small">Choose Security Mode → Low = Unicode, High = Custom Emoji Cipher</p>
+<h1>🌐 Glyphmoji</h1>
+<p class="small">Choose your Mode → Unicode= It can decode anywhere. Emoji Cipher= It can decode only here</p>
 
 <div class="row controls">
-  <label><input type="radio" name="sec" value="low" checked> Low Security</label>
-  <label><input type="radio" name="sec" value="high"> High Security</label>
+  <label><input type="radio" name="sec" value="low" checked> Unicode</label>
+  <label><input type="radio" name="sec" value="high"> Emoji Cipher</label>
 </div>
 
 <textarea id="input" placeholder="Type text here..."></textarea>
@@ -61,7 +48,7 @@ button{padding:10px 14px;border-radius:10px;border:0;background:#5b21b6;color:#f
 <textarea id="output" readonly placeholder="Result will appear here..."></textarea>
 
 <div id="chartArea" style="display:none;margin-top:14px">
-  <h3 style="margin-bottom:6px">📖 Cipher Chart (High Security)</h3>
+  <h3 style="margin-bottom:6px">📖 Cipher Chart (Custom Emoji cipher)</h3>
   <table class="chart"></table>
   <p class="small">Codes shown as <code>#01</code> etc. Space = <code>#00</code></p>
 </div>
@@ -169,11 +156,8 @@ function decode(){
   }
 }
 </script>
-<ul class="nice-list">
-<li>You can easily encode and decode.</li>
-<li>If you encode a custom emoji cipher on this site, it can only be decoded here.</li>
-<li>If you encoded Unicode (UTF-8) on this site, you can decode it on other sites.</li>
-</ul>
-<br><marquee>Thanks for visiting</marquee>
+<br><marquee behavior="scroll" direction="left" 
+  style="position: fixed; bottom: 0; left: 0; width: 100%; 
+         color: #6b21a8; font-size: 16px; font-weight: bold;">Thanks for visiting</marquee>
 </body>
 </html>
